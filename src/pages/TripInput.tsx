@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from '../hooks/useNavigate';
 import { useAuth } from '../contexts/AuthContext';
 import { useItinerary } from '../hooks/useItinerary';
-import { N8N_WEBHOOK_URL } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
 import { Itinerary } from '../types';
 import { ArrowLeft } from 'lucide-react';
 
@@ -38,6 +38,9 @@ export function TripInput() {
     setLoading(true);
 
     try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
       const payload = {
         userId: user?.id,
         workflowType,
@@ -47,14 +50,21 @@ export function TripInput() {
         ...(workflowType === 'plan' && { experiences }),
       };
 
-      const response = await fetch(N8N_WEBHOOK_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        `${supabaseUrl}/functions/v1/generate-itinerary`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to generate itinerary');
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to generate itinerary');
       }
 
       const itinerary: Itinerary = await response.json();

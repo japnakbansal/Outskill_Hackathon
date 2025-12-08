@@ -24,6 +24,16 @@ export function Itinerary() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100 pb-20">
       <div className="max-w-2xl mx-auto">
+        {currentItinerary.headerImageUrl && (
+          <div className="w-full h-64 overflow-hidden">
+            <img
+              src={currentItinerary.headerImageUrl}
+              alt={currentItinerary.destination}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
         <div className="sticky top-0 z-10 bg-gradient-to-br from-slate-50/95 via-blue-50/95 to-slate-100/95 backdrop-blur-lg border-b border-slate-200/50 px-4 py-4">
           <button
             onClick={() => navigate('dashboard')}
@@ -55,6 +65,15 @@ export function Itinerary() {
               key={day.dayNumber}
               className="bg-white/60 backdrop-blur-md border border-slate-200/50 rounded-2xl shadow-lg overflow-hidden"
             >
+              {day.imageUrl && (
+                <div className="w-full h-48 overflow-hidden">
+                  <img
+                    src={day.imageUrl}
+                    alt={`Day ${day.dayNumber}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <div className="p-6 space-y-4">
                 <div className="flex items-start justify-between">
                   <div>
