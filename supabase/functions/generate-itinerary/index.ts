@@ -96,44 +96,45 @@ async function generateItineraryWithAI(
   workflowType: string,
   experiences?: string[]
 ): Promise<DayItinerary[]> {
-  const openaiKey = Deno.env.get('OPENAI_API_KEY');
+  const geminiKey = Deno.env.get('GEMINI_API_KEY');
   
-  if (!openaiKey) {
-    throw new Error('OpenAI API key not configured');
+  if (!geminiKey) {
+    throw new Error('Gemini API key not configured');
   }
 
   const systemPrompt = generateSystemPrompt(workflowType, experiences);
   const userPrompt = generateUserPrompt(destination, duration, budget, workflowType);
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${openaiKey}`,
-    },
-    body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt,
-        },
-        {
-          role: 'user',
-          content: userPrompt,
-        },
-      ],
-      temperature: 0.7,
-    }),
-  });
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        system: systemPrompt,
+        contents: [
+          {
+            role: 'user',
+            parts: [
+              {
+                text: userPrompt,
+              },
+            ],
+          },
+        ],
+      }),
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(`OpenAI API error: ${error.error?.message || 'Unknown error'}`);
+    throw new Error(`Gemini API error: ${error.error?.message || 'Unknown error'}`);
   }
 
   const data = await response.json();
-  const content = data.choices[0]?.message?.content;
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
   
   if (!content) {
     throw new Error('No response from AI');
