@@ -3,11 +3,10 @@ export type WorkflowType = 'plan' | 'surprise';
 export interface DayItinerary {
   dayNumber: number;
   theme?: string;
-  summary?: string;
+  summary: string;
   activitiesSummary: string;
   localStory: string;
   planB: string;
-  imageUrl?: string;
 }
 
 export interface Itinerary {
@@ -16,5 +15,4 @@ export interface Itinerary {
   workflowType: WorkflowType;
   days: DayItinerary[];
   generatedAt?: string;
-  headerImageUrl?: string;
 }
